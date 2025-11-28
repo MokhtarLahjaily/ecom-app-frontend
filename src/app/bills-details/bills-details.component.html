@@ -1,0 +1,39 @@
+<div class="container mt-3" *ngIf="billDetails">
+    <h2>Bill Details: {{billId}}</h2>
+    <div class="card mb-3">
+        <div class="card-header">Customer Details</div>
+        <div class="card-body">
+            <p><strong>ID:</strong> {{billDetails.customer?.id}}</p>
+            <p><strong>Name:</strong> {{billDetails.customer?.name}}</p>
+            <p><strong>Email:</strong> {{billDetails.customer?.email}}</p>
+        </div>
+    </div>
+
+    <h3>Product Items</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let pi of billDetails.productItems">
+                <td>{{pi.productId}}</td>
+                <td>{{pi.product?.name}}</td>
+                <td>{{pi.unitPrice | currency}}</td>
+                <td>{{pi.quantity}}</td>
+                <td>{{pi.unitPrice * pi.quantity | currency}}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-end"><strong>Grand Total:</strong></td>
+                <td><strong>{{calculateTotal() | currency}}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

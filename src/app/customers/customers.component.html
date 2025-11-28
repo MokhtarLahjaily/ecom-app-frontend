@@ -1,0 +1,23 @@
+<div class="container mt-3">
+  <h2>Customers</h2>
+  <table class="table table-striped" *ngIf="customers">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of customers">
+        <td>{{c.id}}</td>
+        <td>{{c.name}}</td>
+        <td>{{c.email}}</td>
+        <td>
+          <button class="btn btn-primary" (click)="handleViewBills(c)">View Bills</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

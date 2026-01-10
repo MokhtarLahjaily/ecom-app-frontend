@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Product } from '../models/product.model';
 
 export interface CartItem {
@@ -7,8 +8,21 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface ProductItemRequest {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface CreateBillRequest {
+  productItems: ProductItemRequest[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  private http = inject(HttpClient);
+  private readonly BILLING_API = 'http://localhost:8888/billing-service/bills';
+
   private items: CartItem[] = [];
   private items$ = new BehaviorSubject<CartItem[]>([]);
 
@@ -49,6 +63,24 @@ export class CartService {
 
   total(): number {
     return this.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  }
+
+  /**
+   * Envoie le panier au backend pour créer une facture.
+   * Transforme les CartItem[] en CreateBillRequest puis vide le panier après succès.
+   */
+  checkout(): Observable<any> {
+    const request: CreateBillRequest = {
+      productItems: this.items.map(item => ({
+        productId: String(item.product.id),
+        quantity: item.quantity,
+        unitPrice: item.product.price
+      }))
+    };
+
+    return this.http.post(this.BILLING_API, request).pipe(
+      tap(() => this.clear())
+    );
   }
 
   private publish() {

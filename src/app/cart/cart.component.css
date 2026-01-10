@@ -1,0 +1,12 @@
+.container {
+  max-width: 900px;
+}
+
+table th,
+table td {
+  vertical-align: middle;
+}
+
+.btn-group .btn {
+  min-width: 36px;
+}

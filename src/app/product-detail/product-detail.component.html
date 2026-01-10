@@ -1,0 +1,31 @@
+<div class="container py-4" *ngIf="!loading && product; else loadingTpl">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="ratio ratio-4x3 bg-light rounded border d-flex align-items-center justify-content-center">
+        <span class="text-muted">No image</span>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <p class="text-uppercase text-secondary fw-semibold mb-1">Product</p>
+      <h2 class="fw-bold">{{ product.name }}</h2>
+      <p class="lead mb-1">Price: <strong>{{ product.price | number:'1.2-2' }}</strong></p>
+      <p class="mb-3">In stock: {{ product.quantity }}</p>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" (click)="addToCart()">Add to cart</button>
+        <a class="btn btn-outline-secondary" routerLink="/products">Back to products</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="container py-4">
+    <div *ngIf="error; else spinner" class="alert alert-danger">{{ error }}</div>
+    <ng-template #spinner>
+      <div class="d-flex align-items-center gap-2">
+        <div class="spinner-border" role="status"></div>
+        <span>Loading product...</span>
+      </div>
+    </ng-template>
+  </div>
+</ng-template>

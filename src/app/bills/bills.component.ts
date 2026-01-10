@@ -21,8 +21,19 @@ export class BillsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    const mode = this.route.snapshot.data['mode'];
     this.customerId = this.route.snapshot.params['customerId'];
-    if (this.customerId) {
+
+    if (mode === 'me') {
+      this.consumerService.getMyBills().subscribe({
+        next: (data) => {
+          this.bills = data; // getMyBills returns List<Bill> directly, not _embedded
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+    } else if (this.customerId) {
       this.consumerService.getBillsByCustomerID(this.customerId).subscribe({
         next: (data) => {
           this.bills = data._embedded.bills;

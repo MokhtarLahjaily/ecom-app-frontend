@@ -24,6 +24,10 @@ export class ConsumerService {
         return this.http.get(`${this.gatewayUrl}/billing-service/api/bills?projection=fullBill`);
     }
 
+    public getMyBills(): Observable<Bill[]> {
+        return this.http.get<Bill[]>(`${this.gatewayUrl}/billing-service/bills/me`);
+    }
+
     public getBillDetails(id: number): Observable<Bill> {
         return this.http.get<Bill>(`${this.gatewayUrl}/billing-service/bills/${id}`);
     }

@@ -1,0 +1,41 @@
+<div class="container py-4">
+  <h3 class="mb-3">Your cart</h3>
+
+  <div *ngIf="!items.length" class="alert alert-info">Your cart is empty.</div>
+
+  <div *ngIf="items.length">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th class="text-end">Price</th>
+          <th class="text-center">Qty</th>
+          <th class="text-end">Subtotal</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>{{ item.product.name }}</td>
+          <td class="text-end">{{ item.product.price | number:'1.2-2' }}</td>
+          <td class="text-center">
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-outline-secondary" (click)="decrease(item)">-</button>
+              <button class="btn btn-light" disabled>{{ item.quantity }}</button>
+              <button class="btn btn-outline-secondary" (click)="increase(item)">+</button>
+            </div>
+          </td>
+          <td class="text-end">{{ item.product.price * item.quantity | number:'1.2-2' }}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-link text-danger" (click)="remove(item)">Remove</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <h5 class="mb-0">Total: {{ total | number:'1.2-2' }}</h5>
+      <button class="btn btn-primary" (click)="checkout()">Place order</button>
+    </div>
+  </div>
+</div>

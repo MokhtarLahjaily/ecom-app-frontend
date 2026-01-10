@@ -1,23 +1,27 @@
-<!-- Grey with black text -->
-<nav class="navbar navbar-expand-sm bg-light navbar-light">
-  <div class="container-fluid">
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/products" routerLinkActive="active">Products</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/customers" routerLinkActive="active">Customers</a>
-      </li>
-
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Orders</a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" routerLink="/bills">Bills</a></li>
-        </ul>
-      </li>
-    </ul>
+<nav class="topbar">
+  <div class="topbar-left">
+    <a class="brand" routerLink="/products">E-Shop</a>
+    <a class="link" routerLink="/products" routerLinkActive="active">Products</a>
+    <a class="link" routerLink="/cart" routerLinkActive="active">Cart</a>
+    @if (securityService.hasRoleIn(['ADMIN'])) {
+      <a class="link" routerLink="/customers" routerLinkActive="active">Customers</a>
+      <a class="link" routerLink="/bills" routerLinkActive="active">All Bills</a>
+    }
+    @if (securityService.profile) {
+      <a class="link" routerLink="/my-bills" routerLinkActive="active">My Orders</a>
+    }
+  </div>
+  <div class="topbar-right">
+    @if (securityService.authStatus()) {
+      <div class="user-block">
+        <span class="user-name">{{ securityService.profile?.username || 'Account' }}</span>
+        <button class="btn primary" (click)="securityService.logout()">Logout</button>
+      </div>
+    } @else {
+      <button class="btn primary" (click)="securityService.login()">Login</button>
+    }
   </div>
 </nav>
-<div class="container">
+<main class="page">
   <router-outlet></router-outlet>
-</div>
+</main>

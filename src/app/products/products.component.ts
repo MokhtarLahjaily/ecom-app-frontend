@@ -1,6 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { Component, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Subject, switchMap, startWith, catchError, of } from 'rxjs';
 import { ProductsService, CreateProductDTO } from '../services/products.service';
 import { CartService } from '../services/cart.service';
 import { SecurityService } from '../services/security.service';
@@ -10,45 +12,43 @@ import { ProductFormComponent, ProductFormData } from '../product-form/product-f
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterLink, DecimalPipe, ProductFormComponent],
+  imports: [CommonModule, RouterLink, ProductFormComponent],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.css']
 })
-export class ProductsComponent implements OnInit {
-  products = signal<Product[]>([]);
-  loading = signal<boolean>(false);
+export class ProductsComponent {
+  private productsService = inject(ProductsService);
+  private cartService = inject(CartService);
+  public securityService = inject(SecurityService);
+
+  // Subject to trigger refetch
+  private readonly refetch$ = new Subject<void>();
+
+  // Read-only signal with automatic subscription management
+  readonly products = toSignal(
+    this.refetch$.pipe(
+      startWith(undefined),
+      switchMap(() => this.productsService.getProducts().pipe(
+        catchError(err => {
+          console.error(err);
+          this.error.set('Failed to load products');
+          return of([] as Product[]);
+        })
+      ))
+    ),
+    { initialValue: [] as Product[] }
+  );
+
   error = signal<string | null>(null);
   
   // Form dialog state
   showForm = signal<boolean>(false);
   editingProduct = signal<Product | null>(null);
 
-  constructor(
-    private productsService: ProductsService,
-    private cartService: CartService,
-    public securityService: SecurityService
-  ) {}
-
-  ngOnInit(): void {
-    console.log('[ProductsComponent] isAdmin:', this.securityService.isAdmin);
-    console.log('[ProductsComponent] authStatus:', this.securityService.authStatus());
-    this.fetchProducts();
-  }
-
-  fetchProducts(): void {
-    this.loading.set(true);
+  /** Trigger a refetch of products */
+  refetchProducts(): void {
     this.error.set(null);
-    this.productsService.getProducts().subscribe({
-      next: (products: Product[]) => {
-        this.products.set(products);
-        this.loading.set(false);
-      },
-      error: (err: unknown) => {
-        console.error(err);
-        this.error.set('Failed to load products');
-        this.loading.set(false);
-      }
-    });
+    this.refetch$.next();
   }
 
   addToCart(product: Product): void {
@@ -58,13 +58,11 @@ export class ProductsComponent implements OnInit {
 
   // Admin actions
   openAddForm(): void {
-    console.log('[ProductsComponent] openAddForm called');
     this.editingProduct.set(null);
     this.showForm.set(true);
   }
 
   openEditForm(product: Product): void {
-    console.log('[ProductsComponent] openEditForm called for:', product.name);
     this.editingProduct.set(product);
     this.showForm.set(true);
   }
@@ -82,7 +80,7 @@ export class ProductsComponent implements OnInit {
       this.productsService.update(String(editing.id), data).subscribe({
         next: () => {
           this.closeForm();
-          this.fetchProducts();
+          this.refetchProducts();
         },
         error: (err) => {
           console.error('Failed to update product:', err);
@@ -94,7 +92,7 @@ export class ProductsComponent implements OnInit {
       this.productsService.create(data).subscribe({
         next: () => {
           this.closeForm();
-          this.fetchProducts();
+          this.refetchProducts();
         },
         error: (err) => {
           console.error('Failed to create product:', err);
@@ -116,7 +114,7 @@ export class ProductsComponent implements OnInit {
   deleteProduct(product: Product): void {
     if (confirm(`Delete "${product.name}"?`)) {
       this.productsService.delete(String(product.id)).subscribe({
-        next: () => this.fetchProducts(),
+        next: () => this.refetchProducts(),
         error: (err) => {
           console.error('Failed to delete product:', err);
           this.error.set('Failed to delete product');

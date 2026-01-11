@@ -2,17 +2,24 @@
 <dialog #productDialog class="product-dialog" (click)="onDialogBackdropClick($event)">
   <div class="dialog-content" (click)="$event.stopPropagation()">
     <h2>{{ isEditing ? 'Edit Product' : 'Add New Product' }}</h2>
-    <form (ngSubmit)="onSubmit()">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="productName">Name</label>
         <input 
           id="productName" 
           type="text" 
-          [ngModel]="formName()" 
-          (ngModelChange)="updateName($event)"
-          name="name" 
-          required
+          formControlName="name"
+          [class.invalid]="nameControl.invalid && nameControl.touched"
         >
+        @if (nameControl.invalid && nameControl.touched) {
+          <div class="error-message">
+            @if (nameControl.hasError('required')) {
+              <span>Name is required.</span>
+            } @else if (nameControl.hasError('minlength')) {
+              <span>Name must be at least 3 characters.</span>
+            }
+          </div>
+        }
       </div>
       <div class="form-group">
         <label for="productPrice">Price (USD)</label>
@@ -20,28 +27,46 @@
           id="productPrice" 
           type="number" 
           step="0.01" 
-          min="0" 
-          [ngModel]="formPrice()" 
-          (ngModelChange)="updatePrice($event)"
-          name="price" 
-          required
+          formControlName="price"
+          [class.invalid]="priceControl.invalid && priceControl.touched"
         >
+        @if (priceControl.invalid && priceControl.touched) {
+          <div class="error-message">
+            @if (priceControl.hasError('required')) {
+              <span>Price is required.</span>
+            } @else if (priceControl.hasError('min')) {
+              <span>Price must be at least $0.01.</span>
+            }
+          </div>
+        }
       </div>
       <div class="form-group">
         <label for="productQuantity">Quantity</label>
         <input 
           id="productQuantity" 
           type="number" 
-          min="0" 
-          [ngModel]="formQuantity()" 
-          (ngModelChange)="updateQuantity($event)"
-          name="quantity" 
-          required
+          formControlName="quantity"
+          [class.invalid]="quantityControl.invalid && quantityControl.touched"
         >
+        @if (quantityControl.invalid && quantityControl.touched) {
+          <div class="error-message">
+            @if (quantityControl.hasError('required')) {
+              <span>Quantity is required.</span>
+            } @else if (quantityControl.hasError('min')) {
+              <span>Quantity cannot be negative.</span>
+            }
+          </div>
+        }
       </div>
       <div class="form-actions">
         <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
-        <button type="submit" class="btn-submit">{{ isEditing ? 'Update' : 'Create' }}</button>
+        <button 
+          type="submit" 
+          class="btn-submit" 
+          [disabled]="form.invalid"
+        >
+          {{ isEditing ? 'Update' : 'Create' }}
+        </button>
       </div>
     </form>
   </div>

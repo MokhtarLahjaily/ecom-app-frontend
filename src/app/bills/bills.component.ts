@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConsumerService } from '../services/consumer.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Bill } from '../models/bill.model';
 
 @Component({
   selector: 'app-bills',
@@ -11,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './bills.component.css'
 })
 export class BillsComponent implements OnInit {
-  bills: any;
+  bills: Bill[] = [];
   customerId!: number;
   mode: string | undefined;
   loading = false;
@@ -32,7 +33,7 @@ export class BillsComponent implements OnInit {
     if (this.mode === 'me') {
       this.consumerService.getMyBills().subscribe({
         next: (data) => {
-          this.bills = data; // getMyBills returns List<Bill> directly, not _embedded
+          this.bills = data;
           this.loading = false;
         },
         error: (err) => {
@@ -44,7 +45,7 @@ export class BillsComponent implements OnInit {
     } else if (this.customerId) {
       this.consumerService.getBillsByCustomerID(this.customerId).subscribe({
         next: (data) => {
-          this.bills = data._embedded.bills;
+          this.bills = data;
           this.loading = false;
         },
         error: (err) => {
@@ -56,7 +57,7 @@ export class BillsComponent implements OnInit {
     } else {
       this.consumerService.getAllBills().subscribe({
         next: (data) => {
-          this.bills = data._embedded.bills;
+          this.bills = data;
           this.loading = false;
         },
         error: (err) => {
@@ -68,7 +69,7 @@ export class BillsComponent implements OnInit {
     }
   }
 
-  handleBillDetails(bill: any) {
+  handleBillDetails(bill: Bill) {
     this.router.navigate(['/bill-details', bill.id]);
   }
 }

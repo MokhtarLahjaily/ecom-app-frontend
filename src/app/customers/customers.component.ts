@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConsumerService } from '../services/consumer.service';
 import { Router } from '@angular/router';
+import { Customer } from '../models/customer.model';
 
 @Component({
   selector: 'app-customers',
@@ -11,14 +12,14 @@ import { Router } from '@angular/router';
   styleUrl: './customers.component.css'
 })
 export class CustomersComponent implements OnInit {
-  customers: any;
+  customers: Customer[] = [];
 
   constructor(private consumerService: ConsumerService, private router: Router) { }
 
   ngOnInit(): void {
     this.consumerService.getCustomers().subscribe({
       next: (data) => {
-        this.customers = data._embedded.customers;
+        this.customers = data;
       },
       error: (err) => {
         console.error(err);
@@ -26,7 +27,7 @@ export class CustomersComponent implements OnInit {
     });
   }
 
-  handleViewBills(customer: any) {
+  handleViewBills(customer: Customer) {
     this.router.navigate(['/bills', customer.id]);
   }
 }

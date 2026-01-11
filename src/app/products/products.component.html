@@ -26,11 +26,8 @@
   @if (error()) {
     <div class="alert error">{{ error() }}</div>
   }
-  @if (loading()) {
-    <div class="alert info">Loading products...</div>
-  }
 
-  @if (!loading() && !error() && products().length) {
+  @if (!error() && products().length) {
     <div class="grid">
       @for (p of products(); track p.id) {
         <article class="card">
@@ -79,7 +76,7 @@
     </div>
   }
 
-  @if (!loading() && !error() && !products().length) {
+  @if (!error() && !products().length) {
     <div class="alert info">No products available.</div>
   }
 </section>

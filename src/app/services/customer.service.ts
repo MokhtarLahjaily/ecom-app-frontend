@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
+import { mapSpringDataResponse } from '../core/utils/api-utils';
 
 export interface Customer {
   id: string;
@@ -30,7 +31,9 @@ export class CustomerService {
   }
 
   getAll(): Observable<Customer[]> {
-    return this.http.get<any>(`${this.gatewayUrl}/customer-service/api/customers`)
-      .pipe(catchError(() => of([])));
+    return this.http.get<unknown>(`${this.gatewayUrl}/customer-service/api/customers`).pipe(
+      mapSpringDataResponse<Customer>('customers'),
+      catchError(() => of([]))
+    );
   }
 }

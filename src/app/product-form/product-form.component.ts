@@ -2,7 +2,6 @@ import {
   Component, 
   input, 
   output, 
-  signal, 
   effect, 
   ViewChild, 
   ElementRef, 
@@ -11,7 +10,7 @@ import {
   inject
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Product } from '../models/product.model';
 
 export interface ProductFormData {
@@ -20,10 +19,17 @@ export interface ProductFormData {
   quantity: number;
 }
 
+/** Strongly-typed form structure */
+interface ProductFormControls {
+  name: FormControl<string>;
+  price: FormControl<number>;
+  quantity: FormControl<number>;
+}
+
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './product-form.component.html',
   styleUrls: ['./product-form.component.css']
 })
@@ -31,6 +37,7 @@ export class ProductFormComponent implements AfterViewInit {
   @ViewChild('productDialog') dialogRef!: ElementRef<HTMLDialogElement>;
   
   private platformId = inject(PLATFORM_ID);
+  private fb = inject(FormBuilder);
 
   // Input signal for the product to edit (null for new product)
   product = input<Product | null>(null);
@@ -42,19 +49,32 @@ export class ProductFormComponent implements AfterViewInit {
   formSubmit = output<ProductFormData>();
   formCancel = output<void>();
 
-  // Form state using signals
-  formName = signal<string>('');
-  formPrice = signal<number>(0);
-  formQuantity = signal<number>(0);
+  // Strongly-typed reactive form
+  form: FormGroup<ProductFormControls> = this.fb.group({
+    name: this.fb.nonNullable.control('', [
+      Validators.required,
+      Validators.minLength(3)
+    ]),
+    price: this.fb.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0.01)
+    ]),
+    quantity: this.fb.nonNullable.control(0, [
+      Validators.required,
+      Validators.min(0)
+    ])
+  });
 
   constructor() {
-    // Effect to sync form fields when product input changes
+    // Effect to sync form values when product input changes (edit mode)
     effect(() => {
       const prod = this.product();
       if (prod) {
-        this.formName.set(prod.name);
-        this.formPrice.set(prod.price);
-        this.formQuantity.set(prod.quantity);
+        this.form.patchValue({
+          name: prod.name,
+          price: prod.price,
+          quantity: prod.quantity
+        });
       } else {
         this.resetForm();
       }
@@ -91,17 +111,33 @@ export class ProductFormComponent implements AfterViewInit {
     return this.product() !== null;
   }
 
+  /** Convenience getters for template validation */
+  get nameControl() { return this.form.controls.name; }
+  get priceControl() { return this.form.controls.price; }
+  get quantityControl() { return this.form.controls.quantity; }
+
   resetForm(): void {
-    this.formName.set('');
-    this.formPrice.set(0);
-    this.formQuantity.set(0);
+    this.form.reset({
+      name: '',
+      price: 0,
+      quantity: 0
+    });
+    this.form.markAsUntouched();
+    this.form.markAsPristine();
   }
 
   onSubmit(): void {
+    // Mark all fields as touched to trigger validation display
+    this.form.markAllAsTouched();
+    
+    if (this.form.invalid) {
+      return;
+    }
+
     const formData: ProductFormData = {
-      name: this.formName(),
-      price: this.formPrice(),
-      quantity: this.formQuantity()
+      name: this.form.controls.name.value,
+      price: this.form.controls.price.value,
+      quantity: this.form.controls.quantity.value
     };
     this.formSubmit.emit(formData);
   }
@@ -116,18 +152,5 @@ export class ProductFormComponent implements AfterViewInit {
     if (event.target === this.dialogRef?.nativeElement) {
       this.onCancel();
     }
-  }
-
-  // Two-way binding helpers for template
-  updateName(value: string): void {
-    this.formName.set(value);
-  }
-
-  updatePrice(value: number): void {
-    this.formPrice.set(value);
-  }
-
-  updateQuantity(value: number): void {
-    this.formQuantity.set(value);
   }
 }

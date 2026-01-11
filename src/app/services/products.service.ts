@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Product } from '../models/product.model';
+import { mapSpringDataResponse } from '../core/utils/api-utils';
 
 export interface CreateProductDTO {
   name: string;
@@ -22,8 +23,8 @@ export class ProductsService {
 
   getAll(): Observable<Product[]> {
     return this.http
-      .get<any>(`${this.gatewayUrl}/inventory-service/api/products?size=200`)
-      .pipe(map((res) => res.content ?? res._embedded?.products ?? []));
+      .get<unknown>(`${this.gatewayUrl}/inventory-service/api/products?size=200`)
+      .pipe(mapSpringDataResponse<Product>('products'));
   }
 
   getById(id: string | number): Observable<Product> {

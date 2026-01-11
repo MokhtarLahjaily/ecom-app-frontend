@@ -1,16 +1,38 @@
 <nav class="topbar">
-  <div class="topbar-left">
-    <a class="brand" routerLink="/products">E-Shop</a>
-    <a class="link" routerLink="/products" routerLinkActive="active">Products</a>
+  <a class="brand" routerLink="/products" (click)="closeMenu()">E-Shop</a>
+  
+  <!-- Hamburger Button (mobile only) -->
+  <button class="hamburger" (click)="toggleMenu()" [attr.aria-expanded]="isMenuOpen()" aria-label="Toggle menu">
+    @if (isMenuOpen()) {
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    } @else {
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12h18M3 6h18M3 18h18"/>
+      </svg>
+    }
+  </button>
+
+  <!-- Overlay (mobile only) -->
+  @if (isMenuOpen()) {
+    <div class="menu-overlay" (click)="closeMenu()"></div>
+  }
+
+  <!-- Navigation Links -->
+  <div class="nav-links" [class.active]="isMenuOpen()">
+    <a class="link" routerLink="/products" routerLinkActive="active" (click)="closeMenu()">Products</a>
     @if (securityService.hasRoleIn(['USER'])) {
-      <a class="link" routerLink="/cart" routerLinkActive="active">Cart</a>
-      <a class="link" routerLink="/my-bills" routerLinkActive="active">My Orders</a>
+      <a class="link" routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Cart</a>
+      <a class="link" routerLink="/my-bills" routerLinkActive="active" (click)="closeMenu()">My Orders</a>
     }
     @if (securityService.hasRoleIn(['ADMIN'])) {
-      <a class="link" routerLink="/customers" routerLinkActive="active">Customers</a>
-      <a class="link" routerLink="/bills" routerLinkActive="active">All Bills</a>
+      <a class="link" routerLink="/customers" routerLinkActive="active" (click)="closeMenu()">Customers</a>
+      <a class="link" routerLink="/bills" routerLinkActive="active" (click)="closeMenu()">All Bills</a>
     }
   </div>
+
+  <!-- User Actions -->
   <div class="topbar-right">
     @if (securityService.authStatus()) {
       <div class="user-block">
@@ -25,3 +47,4 @@
 <main class="page">
   <router-outlet></router-outlet>
 </main>
+<app-toast></app-toast>

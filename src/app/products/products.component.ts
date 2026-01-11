@@ -2,10 +2,11 @@ import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subject, switchMap, startWith, catchError, of } from 'rxjs';
+import { Subject, switchMap, startWith, catchError, of, tap, finalize } from 'rxjs';
 import { ProductsService, CreateProductDTO } from '../services/products.service';
 import { CartService } from '../services/cart.service';
 import { SecurityService } from '../services/security.service';
+import { ToastService } from '../services/toast.service';
 import { Product } from '../models/product.model';
 import { ProductFormComponent, ProductFormData } from '../product-form/product-form.component';
 
@@ -19,19 +20,29 @@ import { ProductFormComponent, ProductFormData } from '../product-form/product-f
 export class ProductsComponent {
   private productsService = inject(ProductsService);
   private cartService = inject(CartService);
+  private toastService = inject(ToastService);
   public securityService = inject(SecurityService);
 
   // Subject to trigger refetch
   private readonly refetch$ = new Subject<void>();
 
+  // Loading state for skeleton display
+  readonly isLoading = signal<boolean>(true);
+
+  // Skeleton placeholder array for template
+  readonly skeletonItems = [1, 2, 3, 4, 5, 6];
+
   // Read-only signal with automatic subscription management
   readonly products = toSignal(
     this.refetch$.pipe(
       startWith(undefined),
+      tap(() => this.isLoading.set(true)),
       switchMap(() => this.productsService.getProducts().pipe(
+        tap(() => this.isLoading.set(false)),
         catchError(err => {
           console.error(err);
           this.error.set('Failed to load products');
+          this.isLoading.set(false);
           return of([] as Product[]);
         })
       ))
@@ -45,6 +56,22 @@ export class ProductsComponent {
   showForm = signal<boolean>(false);
   editingProduct = signal<Product | null>(null);
 
+  // Track loading state per product ID for button spinners
+  readonly actionLoading = signal<Set<number>>(new Set());
+
+  /** Update loading state for a specific product ID */
+  private setLoading(id: number, isLoading: boolean): void {
+    this.actionLoading.update(set => {
+      const newSet = new Set(set);
+      if (isLoading) {
+        newSet.add(id);
+      } else {
+        newSet.delete(id);
+      }
+      return newSet;
+    });
+  }
+
   /** Trigger a refetch of products */
   refetchProducts(): void {
     this.error.set(null);
@@ -52,8 +79,13 @@ export class ProductsComponent {
   }
 
   addToCart(product: Product): void {
-    this.cartService.add(product, 1);
-    alert('Added to cart');
+    this.setLoading(product.id, true);
+    // Simulate async operation for visual feedback
+    setTimeout(() => {
+      this.cartService.add(product, 1);
+      this.toastService.success('Product added to cart');
+      this.setLoading(product.id, false);
+    }, 300);
   }
 
   // Admin actions
@@ -81,10 +113,11 @@ export class ProductsComponent {
         next: () => {
           this.closeForm();
           this.refetchProducts();
+          this.toastService.success('Product updated successfully');
         },
         error: (err) => {
           console.error('Failed to update product:', err);
-          this.error.set('Failed to update product');
+          this.toastService.error('Failed to update product');
         }
       });
     } else {
@@ -93,10 +126,11 @@ export class ProductsComponent {
         next: () => {
           this.closeForm();
           this.refetchProducts();
+          this.toastService.success('Product created successfully');
         },
         error: (err) => {
           console.error('Failed to create product:', err);
-          this.error.set('Failed to create product');
+          this.toastService.error('Failed to create product');
         }
       });
     }
@@ -113,11 +147,17 @@ export class ProductsComponent {
 
   deleteProduct(product: Product): void {
     if (confirm(`Delete "${product.name}"?`)) {
-      this.productsService.delete(String(product.id)).subscribe({
-        next: () => this.refetchProducts(),
+      this.setLoading(product.id, true);
+      this.productsService.delete(String(product.id)).pipe(
+        finalize(() => this.setLoading(product.id, false))
+      ).subscribe({
+        next: () => {
+          this.refetchProducts();
+          this.toastService.success('Product deleted successfully');
+        },
         error: (err) => {
           console.error('Failed to delete product:', err);
-          this.error.set('Failed to delete product');
+          this.toastService.error('Failed to delete product');
         }
       });
     }

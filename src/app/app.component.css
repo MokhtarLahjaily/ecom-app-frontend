@@ -7,13 +7,7 @@
 	border-bottom: 1px solid #e2e8f0;
 	position: sticky;
 	top: 0;
-	z-index: 10;
-}
-
-.topbar-left {
-	display: flex;
-	align-items: center;
-	gap: 0.9rem;
+	z-index: 100;
 }
 
 .brand {
@@ -21,6 +15,16 @@
 	color: #0f172a;
 	text-decoration: none;
 	margin-right: 0.5rem;
+	flex-shrink: 0;
+}
+
+/* Navigation Links Container */
+.nav-links {
+	display: flex;
+	align-items: center;
+	gap: 0.9rem;
+	flex: 1;
+	margin-left: 1rem;
 }
 
 .link {
@@ -40,6 +44,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
+	flex-shrink: 0;
 }
 
 .user-block {
@@ -79,4 +84,124 @@
 .page {
 	max-width: 1200px;
 	margin: 0 auto;
+}
+
+/* Hamburger Button - Hidden on Desktop */
+.hamburger {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border: none;
+	background: transparent;
+	color: #0f172a;
+	cursor: pointer;
+	border-radius: 8px;
+	transition: background 0.15s ease;
+}
+
+.hamburger:hover {
+	background: #e2e8f0;
+}
+
+/* Menu Overlay - Hidden on Desktop */
+.menu-overlay {
+	display: none;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+@media (max-width: 768px) {
+	.topbar {
+		flex-wrap: wrap;
+		padding: 0.75rem 1rem;
+	}
+
+	/* Show Hamburger */
+	.hamburger {
+		display: flex;
+		order: 2;
+	}
+
+	/* Brand stays first */
+	.brand {
+		order: 1;
+		flex: 1;
+	}
+
+	/* User actions last on same row */
+	.topbar-right {
+		order: 3;
+	}
+
+	/* Hide username on mobile */
+	.user-name {
+		display: none;
+	}
+
+	/* Navigation Links - Hidden by default, slide in from left */
+	.nav-links {
+		position: fixed;
+		top: 60px;
+		left: 0;
+		width: 280px;
+		height: calc(100vh - 60px);
+		background: #fff;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0;
+		margin: 0;
+		padding: 1rem 0;
+		box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+		transform: translateX(-100%);
+		transition: transform 0.3s ease;
+		z-index: 200;
+		overflow-y: auto;
+	}
+
+	/* Show nav links when active */
+	.nav-links.active {
+		transform: translateX(0);
+	}
+
+	/* Style links for vertical layout */
+	.nav-links .link {
+		padding: 1rem 1.5rem;
+		border-bottom: 1px solid #e2e8f0;
+		border-left: 3px solid transparent;
+	}
+
+	.nav-links .link:first-child {
+		border-top: 1px solid #e2e8f0;
+	}
+
+	.nav-links .link.active {
+		background: #f1f5f9;
+		border-left-color: #2563eb;
+		border-bottom-color: #e2e8f0;
+	}
+
+	.nav-links .link:hover {
+		background: #f8fafc;
+	}
+
+	/* Overlay */
+	.menu-overlay {
+		display: block;
+		position: fixed;
+		top: 60px;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(15, 23, 42, 0.5);
+		z-index: 150;
+		animation: fadeIn 0.2s ease;
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
 }

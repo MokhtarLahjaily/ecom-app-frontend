@@ -24,10 +24,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (isExpired) {
     // Token is expired or about to expire - refresh it first
     return from(keycloak.updateToken(MIN_TOKEN_VALIDITY_SECONDS)).pipe(
-      switchMap((refreshed) => {
-        if (refreshed) {
-          console.log('[AuthInterceptor] Token refreshed successfully');
-        }
+      switchMap(() => {
         // Attach the fresh token
         return next(cloneWithAuth(req, keycloak.token!));
       }),

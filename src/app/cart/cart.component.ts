@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService, CartItem } from '../services/cart.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-cart',
@@ -16,7 +17,11 @@ export class CartComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  constructor(private cart: CartService, private router: Router) {}
+  constructor(
+    private cart: CartService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.sync();
@@ -48,7 +53,7 @@ export class CartComponent implements OnInit {
     this.cart.checkout().subscribe({
       next: (bill) => {
         this.loading = false;
-        alert('Order placed successfully!');
+        this.toastService.success('Order placed successfully!');
         this.router.navigate(['/my-bills']);
       },
       error: (err) => {

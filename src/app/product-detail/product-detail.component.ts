@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ProductsService } from '../services/products.service';
 import { CartService } from '../services/cart.service';
+import { ToastService } from '../services/toast.service';
 import { Product } from '../models/product.model';
 
 @Component({
@@ -20,7 +21,8 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productsService: ProductsService,
-    private cart: CartService
+    private cart: CartService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -45,7 +47,7 @@ export class ProductDetailComponent implements OnInit {
   addToCart() {
     if (this.product) {
       this.cart.add(this.product, 1);
-      alert('Added to cart');
+      this.toastService.success('Product added to cart');
     }
   }
 }

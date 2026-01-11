@@ -21,9 +21,7 @@ export class SecurityService {
     public isAdmin: Signal<boolean> = computed(() => {
         const authenticated = this.authState();
         const roles = this.userRoles();
-        const result = authenticated && roles.includes('ADMIN');
-        console.log('[SecurityService] isAdmin computed:', { authenticated, roles, result });
-        return result;
+        return authenticated && roles.includes('ADMIN');
     });
     
     // Computed signal for logged in state
@@ -69,17 +67,14 @@ export class SecurityService {
         const clientRoles: string[] = tokenParsed?.resource_access?.['ecomm-app']?.roles || [];
         // Merge and dedupe roles, normalize to uppercase
         const allRoles = [...new Set([...realmRoles, ...clientRoles])].map(r => r.toUpperCase());
-        console.log('[SecurityService] Updating roles:', allRoles);
         this.userRoles.set(allRoles);
     }
 
     public async login() {
-        console.log('[SecurityService] Login called');
         await keycloak.login({ redirectUri: window.location.origin + '/products' });
     }
 
     public async logout() {
-        console.log('[SecurityService] Logout called');
         this.runInZone(() => {
             this.authState.set(false);
             this.userRoles.set([]);
@@ -97,11 +92,7 @@ export class SecurityService {
             const { CustomerService } = await import('./customer.service');
             const customerService = this.injector.get(CustomerService);
             customerService.syncCurrentUser().subscribe({
-                next: (customer) => {
-                    if (customer) {
-                        console.log('[SecurityService] Customer synced:', customer.username);
-                    }
-                },
+                next: () => {},  // Customer synced successfully
                 error: (err) => console.warn('[SecurityService] Customer sync failed:', err)
             });
         } catch (e) {
@@ -113,8 +104,6 @@ export class SecurityService {
      * Called once after Keycloak init succeeds to hydrate profile and wire auth events.
      */
     public async handleAuthInit(authenticated: boolean): Promise<void> {
-        console.log('[SecurityService] handleAuthInit:', authenticated);
-        
         this.runInZone(() => {
             this.authState.set(authenticated);
             if (authenticated) {
@@ -127,7 +116,6 @@ export class SecurityService {
         if (authenticated && keycloak.token) {
             try {
                 const profile = await keycloak.loadUserProfile();
-                console.log('[SecurityService] Profile loaded:', profile.username);
                 this.runInZone(() => {
                     this._profile.set(profile);
                 });
@@ -140,7 +128,6 @@ export class SecurityService {
 
         // Set up event handlers
         keycloak.onAuthSuccess = async () => {
-            console.log('[SecurityService] onAuthSuccess');
             this.runInZone(() => {
                 this.authState.set(true);
                 this.updateRolesFromToken();
@@ -153,7 +140,6 @@ export class SecurityService {
         };
 
         keycloak.onAuthLogout = () => {
-            console.log('[SecurityService] onAuthLogout');
             this.runInZone(() => {
                 this._profile.set(undefined);
                 this.userRoles.set([]);
@@ -162,7 +148,6 @@ export class SecurityService {
         };
 
         keycloak.onTokenExpired = () => {
-            console.log('[SecurityService] Token expired, refreshing...');
             keycloak.updateToken(60).catch(() => this.logout());
         };
     }
@@ -177,7 +162,6 @@ export class SecurityService {
         this.authSyncHandle = window.setInterval(() => {
             const current = !!keycloak.authenticated;
             if (this.authState() !== current) {
-                console.log('[SecurityService] Watcher detected change:', current);
                 this.runInZone(() => {
                     this.authState.set(current);
                     if (current) {

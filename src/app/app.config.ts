@@ -21,11 +21,8 @@ function initKeycloak() {
   return async () => {
     const isBrowser = isPlatformBrowser(platformId);
     if (!isBrowser || typeof window === 'undefined') {
-      console.log('[Keycloak] Skipping init (SSR)');
-      return;
+      return; // Skip Keycloak init in SSR
     }
-    
-    console.log('[Keycloak] Initializing...');
     
     try {
       // Use 'login-required' to force login on app start
@@ -34,12 +31,6 @@ function initKeycloak() {
         checkLoginIframe: false,
         pkceMethod: 'S256'
       });
-      
-      console.log('[Keycloak] Authenticated:', authenticated);
-      console.log('[Keycloak] Token present:', !!keycloak.token);
-      if (keycloak.tokenParsed) {
-        console.log('[Keycloak] Roles:', keycloak.tokenParsed.realm_access?.roles);
-      }
       
       await security.handleAuthInit(authenticated);
     } catch (err) {

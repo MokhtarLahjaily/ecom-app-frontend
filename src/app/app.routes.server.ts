@@ -5,6 +5,8 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'products/:id', renderMode: RenderMode.Client },
   { path: 'bills/:customerId', renderMode: RenderMode.Client },
   { path: 'bill-details/:billId', renderMode: RenderMode.Client },
+  // Analytics dashboard - client-side only (uses polling/SSE)
+  { path: 'admin/analytics', renderMode: RenderMode.Client },
   // Prerender static routes
   { path: '**', renderMode: RenderMode.Prerender }
 ];

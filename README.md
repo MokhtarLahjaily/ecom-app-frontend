@@ -42,6 +42,7 @@ Ce projet académique implémente le **frontend Angular** d'une application e-co
 - 🧾 **Factures** : Consultation des factures détaillées
 - 🔐 **Authentification** : OAuth2/OIDC avec Keycloak
 - 👨‍💼 **Administration** : Interface CRUD pour les produits (rôle ADMIN)
+- 📊 **Analytics Dashboard** : Visualisation temps réel des statistiques avec Kafka Streams
 
 ### Objectifs Pédagogiques
 
@@ -54,6 +55,7 @@ Ce projet a été réalisé dans le cadre du cours **J2EE** sous la supervision 
 - ✅ Communication avec APIs REST
 - ✅ Gestion des rôles et autorisations
 - ✅ Interface responsive avec Bootstrap 5
+- ✅ Dashboard Analytics temps réel avec Kafka Streams
 
 ---
 
@@ -412,6 +414,24 @@ keycloak.init({
 
 ---
 
+### 5️⃣ Dashboard Analytics - Kafka Streams
+
+#### Page Analytics Administrateur
+
+![Admin Kafka Analytics Page](captures/admin-kafka-analytics-page.png)
+
+> **📸 Figure 12** : Dashboard Analytics accessible aux administrateurs via `/admin/analytics`. Ce composant affiche les **statistiques de visites produits en temps réel** sous forme de graphiques (barres et camembert). Les données sont récupérées depuis **analytics-service** qui agrège les événements Kafka via **Kafka Streams**. Le dashboard se rafraîchit automatiquement toutes les 5 secondes grâce au **polling RxJS**.
+
+---
+
+#### Kafka Fonctionnel - Flux de Données
+
+![Functional Kafka](captures/functionnal-kafka.png)
+
+> **📸 Figure 13** : Démonstration du flux Kafka fonctionnel. Quand un utilisateur consulte un produit, l'**inventory-service** publie un événement `PageEvent` sur le topic `visite-topic`. L'**analytics-service** consomme ces événements via **Kafka Streams**, les agrège par fenêtres temporelles de 5 minutes, et stocke les comptages dans un **State Store RocksDB**. Le frontend Angular interroge ensuite l'API `/api/analytics/snapshot` pour afficher les statistiques.
+
+---
+
 ## 👥 Utilisateurs de Test
 
 | Utilisateur | Mot de passe | Rôle | Permissions |
@@ -443,6 +463,11 @@ GET    /CUSTOMER-SERVICE/api/customers/search/current-user // Client courant
 GET    /BILLING-SERVICE/api/bills            // Mes factures
 GET    /BILLING-SERVICE/api/bills/{id}       // Détail facture
 POST   /BILLING-SERVICE/api/bills            // Créer commande
+
+// Analytics (Analytics Service - accès direct port 8084)
+GET    /api/analytics/snapshot               // Statistiques agrégées
+GET    /api/analytics/stream                 // Flux SSE temps réel
+GET    /analytics                            // Stream SSE principal
 ```
 
 ---
@@ -471,6 +496,9 @@ Ce projet a été réalisé en suivant les tutoriels du **Prof. Mohamed YOUSSFI*
 - [x] Système de notifications Toast
 - [x] Gestion des rôles (USER/ADMIN)
 - [x] Design responsive avec Bootstrap 5
+- [x] Dashboard Analytics avec graphiques (Bar/Pie charts)
+- [x] Service Analytics avec polling RxJS
+- [x] Intégration Kafka Streams pour statistiques temps réel
 
 ---
 
@@ -486,6 +514,8 @@ Ce projet a été réalisé en suivant les tutoriels du **Prof. Mohamed YOUSSFI*
 - ✅ **Panier Persistant** avec localStorage
 - ✅ **Navigation Hamburger** responsive
 - ✅ **Formulaires Réactifs** avec validation
+- ✅ **Dashboard Analytics** avec graphiques interactifs
+- ✅ **Intégration Kafka** pour streaming temps réel
 
 ---
 

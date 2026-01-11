@@ -29,6 +29,9 @@
     @if (securityService.hasRoleIn(['ADMIN'])) {
       <a class="link" routerLink="/customers" routerLinkActive="active" (click)="closeMenu()">Customers</a>
       <a class="link" routerLink="/bills" routerLinkActive="active" (click)="closeMenu()">All Bills</a>
+      <a class="link" routerLink="/admin/analytics" routerLinkActive="active" (click)="closeMenu()">
+        <i class="bi bi-graph-up"></i> Analytics
+      </a>
     }
   </div>
 

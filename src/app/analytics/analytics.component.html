@@ -1,0 +1,207 @@
+<div class="analytics-container">
+  <!-- Header -->
+  <div class="analytics-header">
+    <div class="header-content">
+      <h1>
+        <i class="bi bi-graph-up"></i>
+        Dashboard Analytics
+      </h1>
+      <p class="subtitle">Statistiques en temps réel des visites produits</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-toggle" (click)="toggleChartMode()" [title]="chartMode() === 'bar' ? 'Passer en Pie Chart' : 'Passer en Bar Chart'">
+        <i [class]="chartMode() === 'bar' ? 'bi bi-pie-chart' : 'bi bi-bar-chart'"></i>
+        {{ chartMode() === 'bar' ? 'Pie Chart' : 'Bar Chart' }}
+      </button>
+      <button class="btn-refresh" (click)="refresh()" [disabled]="isLoading()">
+        <i class="bi bi-arrow-clockwise" [class.spinning]="isLoading()"></i>
+        Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon bg-primary">
+        <i class="bi bi-eye"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalVisits() }}</span>
+        <span class="stat-label">Total Visites</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-success">
+        <i class="bi bi-box"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ uniquePages() }}</span>
+        <span class="stat-label">Produits Uniques</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-info">
+        <i class="bi bi-clock"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">5s</span>
+        <span class="stat-label">Intervalle Refresh</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-warning">
+        <i class="bi bi-activity"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value" [title]="lastUpdate()?.toLocaleString() || 'N/A'">
+          {{ lastUpdate() ? (lastUpdate() | date:'HH:mm:ss') : '--:--:--' }}
+        </span>
+        <span class="stat-label">Dernière MAJ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error()) {
+    <div class="alert alert-error">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ error() }}
+      <button class="btn-close" (click)="error.set(null)">×</button>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading() && chartData().length === 0) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Chargement des données analytiques...</p>
+    </div>
+  }
+
+  <!-- No Data State -->
+  @if (!isLoading() && chartData().length === 0 && !error()) {
+    <div class="no-data">
+      <i class="bi bi-inbox"></i>
+      <h3>Aucune donnée disponible</h3>
+      <p>Les statistiques apparaîtront ici lorsque des visiteurs consulteront les produits.</p>
+    </div>
+  }
+
+  <!-- Charts -->
+  @if (chartData().length > 0) {
+    <div class="chart-container">
+      <h2 class="chart-title">
+        <i [class]="chartMode() === 'bar' ? 'bi bi-bar-chart' : 'bi bi-pie-chart'"></i>
+        Visites par Produit
+      </h2>
+
+      <!-- Bar Chart -->
+      @if (chartMode() === 'bar') {
+        <div class="bar-chart">
+          @for (item of chartData(); track item.name) {
+            <div class="bar-item">
+              <div class="bar-label">
+                <span class="bar-name" [title]="item.name">{{ item.name }}</span>
+                <span class="bar-value">{{ item.value }}</span>
+              </div>
+              <div class="bar-track">
+                <div 
+                  class="bar-fill" 
+                  [style.width.%]="getBarWidth(item.value)"
+                  [style.background-color]="item.color">
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Pie Chart (CSS-based) -->
+      @if (chartMode() === 'pie') {
+        <div class="pie-chart-container">
+          <div class="pie-chart">
+            <svg viewBox="0 0 100 100" class="pie-svg">
+              @for (item of chartData(); track item.name; let i = $index) {
+                <circle 
+                  class="pie-segment"
+                  cx="50" cy="50" r="40"
+                  [style.stroke]="item.color"
+                  [style.stroke-dasharray]="getPercentage(item.value) * 2.51 + ' ' + (251 - getPercentage(item.value) * 2.51)"
+                  [style.stroke-dashoffset]="getPieRotation(i) * 0.7 * -1"
+                  fill="transparent"
+                  stroke-width="20">
+                </circle>
+              }
+            </svg>
+            <div class="pie-center">
+              <span class="pie-total">{{ totalVisits() }}</span>
+              <span class="pie-label">Total</span>
+            </div>
+          </div>
+          
+          <!-- Legend -->
+          <div class="pie-legend">
+            @for (item of chartData(); track item.name) {
+              <div class="legend-item">
+                <span class="legend-color" [style.background-color]="item.color"></span>
+                <span class="legend-name">{{ item.name }}</span>
+                <span class="legend-value">{{ item.value }} ({{ getPercentage(item.value) | number:'1.1-1' }}%)</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-container">
+      <h2 class="table-title">
+        <i class="bi bi-table"></i>
+        Détails des Statistiques
+      </h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Produit / Page</th>
+            <th>Visites</th>
+            <th>Pourcentage</th>
+            <th>Visualisation</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of chartData(); track item.name; let i = $index) {
+            <tr>
+              <td class="rank">{{ i + 1 }}</td>
+              <td class="name">
+                <span class="color-dot" [style.background-color]="item.color"></span>
+                {{ item.name }}
+              </td>
+              <td class="value">{{ item.value }}</td>
+              <td class="percentage">{{ getPercentage(item.value) | number:'1.1-1' }}%</td>
+              <td class="mini-bar">
+                <div class="mini-bar-track">
+                  <div 
+                    class="mini-bar-fill" 
+                    [style.width.%]="getBarWidth(item.value)"
+                    [style.background-color]="item.color">
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Footer Info -->
+  <div class="analytics-footer">
+    <p>
+      <i class="bi bi-info-circle"></i>
+      Les données sont rafraîchies automatiquement toutes les 5 secondes via polling RxJS.
+      Source: <strong>ANALYTICS-SERVICE</strong> via Spring Cloud Gateway.
+    </p>
+  </div>
+</div>

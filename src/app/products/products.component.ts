@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +12,8 @@ import { Product } from '../models/product.model';
   standalone: true,
   imports: [CommonModule, RouterLink, DecimalPipe, FormsModule],
   templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css']
+  styleUrls: ['./products.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ProductsComponent implements OnInit {
   products = signal<Product[]>([]);
@@ -35,6 +36,8 @@ export class ProductsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log('[ProductsComponent] isAdmin:', this.securityService.isAdmin);
+    console.log('[ProductsComponent] authStatus:', this.securityService.authStatus());
     this.fetchProducts();
   }
 
@@ -61,19 +64,23 @@ export class ProductsComponent implements OnInit {
 
   // Admin actions
   openAddForm() {
+    console.log('[ProductsComponent] openAddForm called');
     this.editingProduct.set(null);
     this.formName = '';
     this.formPrice = 0;
     this.formQuantity = 0;
     this.showForm.set(true);
+    console.log('[ProductsComponent] showForm:', this.showForm());
   }
 
   openEditForm(product: Product) {
+    console.log('[ProductsComponent] openEditForm called for:', product.name);
     this.editingProduct.set(product);
     this.formName = product.name;
     this.formPrice = product.price;
     this.formQuantity = product.quantity;
     this.showForm.set(true);
+    console.log('[ProductsComponent] showForm:', this.showForm());
   }
 
   cancelForm() {

@@ -6,6 +6,81 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    /* Global modal styles - ensures visibility regardless of component encapsulation */
+    .modal-overlay {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.6) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      z-index: 999999 !important;
+    }
+    .modal-overlay .modal {
+      background: white !important;
+      padding: 2rem !important;
+      border-radius: 12px !important;
+      width: 90% !important;
+      max-width: 420px !important;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3) !important;
+    }
+    .modal-overlay .modal h2 {
+      margin: 0 0 1.5rem !important;
+      color: #1e293b !important;
+      font-size: 1.5rem !important;
+    }
+    .modal-overlay .form-group {
+      margin-bottom: 1rem !important;
+    }
+    .modal-overlay .form-group label {
+      display: block !important;
+      margin-bottom: 0.5rem !important;
+      font-weight: 600 !important;
+      color: #334155 !important;
+    }
+    .modal-overlay .form-group input {
+      width: 100% !important;
+      padding: 0.75rem !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 8px !important;
+      font-size: 1rem !important;
+      box-sizing: border-box !important;
+    }
+    .modal-overlay .form-group input:focus {
+      outline: none !important;
+      border-color: #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    }
+    .modal-overlay .form-actions {
+      display: flex !important;
+      gap: 0.75rem !important;
+      justify-content: flex-end !important;
+      margin-top: 1.5rem !important;
+    }
+    .modal-overlay .form-actions button {
+      padding: 0.75rem 1.25rem !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      font-size: 1rem !important;
+    }
+    .modal-overlay .form-actions button[type="button"] {
+      border: 1px solid #cbd5e1 !important;
+      background: white !important;
+      color: #334155 !important;
+    }
+    .modal-overlay .form-actions button[type="submit"] {
+      border: none !important;
+      background: #2563eb !important;
+      color: white !important;
+    }
+  </style>
 </head>
 <body>
   <app-root></app-root>

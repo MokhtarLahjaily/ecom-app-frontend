@@ -1,7 +1,15 @@
 <div class="container mt-3">
-    <h2 *ngIf="customerId">Bills for Customer {{customerId}}</h2>
-    <h2 *ngIf="!customerId">All Bills</h2>
-    <table class="table table-striped" *ngIf="bills">
+    <h2 *ngIf="mode === 'me'">My Orders</h2>
+    <h2 *ngIf="customerId && mode !== 'me'">Bills for Customer {{customerId}}</h2>
+    <h2 *ngIf="!customerId && mode !== 'me'">All Bills</h2>
+    
+    <div *ngIf="loading" class="alert alert-info">Loading...</div>
+    <div *ngIf="error" class="alert alert-danger">{{error}}</div>
+    <div *ngIf="!loading && !error && (!bills || bills.length === 0)" class="alert alert-warning">
+        No orders found.
+    </div>
+    
+    <table class="table table-striped" *ngIf="bills && bills.length > 0">
         <thead>
             <tr>
                 <th>ID</th>

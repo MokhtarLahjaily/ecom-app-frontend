@@ -1,7 +1,8 @@
 <div class="container py-4">
   <h3 class="mb-3">Your cart</h3>
 
-  <div *ngIf="!items.length" class="alert alert-info">Your cart is empty.</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="!items.length && !error" class="alert alert-info">Your cart is empty.</div>
 
   <div *ngIf="items.length">
     <table class="table align-middle">
@@ -35,7 +36,10 @@
 
     <div class="d-flex justify-content-between align-items-center mt-3">
       <h5 class="mb-0">Total: {{ total | number:'1.2-2' }}</h5>
-      <button class="btn btn-primary" (click)="checkout()">Place order</button>
+      <button class="btn btn-primary" (click)="checkout()" [disabled]="loading">
+        <span *ngIf="loading">Processing...</span>
+        <span *ngIf="!loading">Place order</span>
+      </button>
     </div>
   </div>
 </div>

@@ -25,7 +25,7 @@ export class ConsumerService {
     }
 
     public getMyBills(): Observable<Bill[]> {
-        return this.http.get<Bill[]>(`${this.gatewayUrl}/billing-service/bills/me`);
+        return this.http.get<Bill[]>(`${this.gatewayUrl}/billing-service/bills/search/by-user`);
     }
 
     public getBillDetails(id: number): Observable<Bill> {

@@ -28,14 +28,18 @@ function initKeycloak() {
     console.log('[Keycloak] Initializing...');
     
     try {
-      // Use 'check-sso' to check if user is already logged in without forcing login
+      // Use 'login-required' to force login on app start
       const authenticated = await keycloak.init({
-        onLoad: 'check-sso',
-        checkLoginIframe: false
+        onLoad: 'login-required',
+        checkLoginIframe: false,
+        pkceMethod: 'S256'
       });
       
       console.log('[Keycloak] Authenticated:', authenticated);
       console.log('[Keycloak] Token present:', !!keycloak.token);
+      if (keycloak.tokenParsed) {
+        console.log('[Keycloak] Roles:', keycloak.tokenParsed.realm_access?.roles);
+      }
       
       await security.handleAuthInit(authenticated);
     } catch (err) {

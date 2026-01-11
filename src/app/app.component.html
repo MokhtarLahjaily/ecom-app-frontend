@@ -2,13 +2,13 @@
   <div class="topbar-left">
     <a class="brand" routerLink="/products">E-Shop</a>
     <a class="link" routerLink="/products" routerLinkActive="active">Products</a>
-    <a class="link" routerLink="/cart" routerLinkActive="active">Cart</a>
+    @if (securityService.hasRoleIn(['USER'])) {
+      <a class="link" routerLink="/cart" routerLinkActive="active">Cart</a>
+      <a class="link" routerLink="/my-bills" routerLinkActive="active">My Orders</a>
+    }
     @if (securityService.hasRoleIn(['ADMIN'])) {
       <a class="link" routerLink="/customers" routerLinkActive="active">Customers</a>
       <a class="link" routerLink="/bills" routerLinkActive="active">All Bills</a>
-    }
-    @if (securityService.profile) {
-      <a class="link" routerLink="/my-bills" routerLinkActive="active">My Orders</a>
     }
   </div>
   <div class="topbar-right">

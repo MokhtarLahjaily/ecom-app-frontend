@@ -23,7 +23,7 @@ export class ProductsService {
   getAll(): Observable<Product[]> {
     return this.http
       .get<any>(`${this.gatewayUrl}/inventory-service/api/products?size=200`)
-      .pipe(map((res) => res._embedded?.products ?? []));
+      .pipe(map((res) => res.content ?? res._embedded?.products ?? []));
   }
 
   getById(id: string | number): Observable<Product> {

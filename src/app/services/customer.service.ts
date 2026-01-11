@@ -17,11 +17,11 @@ export class CustomerService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Calls /api/customers/me to ensure the current Keycloak user exists as a Customer in the DB.
+   * Calls /api/customers/search/current-user to ensure the current Keycloak user exists as a Customer in the DB.
    * Creates the customer on first access.
    */
   syncCurrentUser(): Observable<Customer | null> {
-    return this.http.get<Customer>(`${this.gatewayUrl}/customer-service/api/customers/me`).pipe(
+    return this.http.get<Customer>(`${this.gatewayUrl}/customer-service/api/customers/search/current-user`).pipe(
       catchError(err => {
         console.warn('[CustomerService] Failed to sync customer:', err);
         return of(null);

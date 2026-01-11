@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { CartService, CartItem } from '../services/cart.service';
 
 @Component({
@@ -12,8 +13,10 @@ import { CartService, CartItem } from '../services/cart.service';
 export class CartComponent implements OnInit {
   items: CartItem[] = [];
   total = 0;
+  loading = false;
+  error: string | null = null;
 
-  constructor(private cart: CartService) {}
+  constructor(private cart: CartService, private router: Router) {}
 
   ngOnInit(): void {
     this.sync();
@@ -34,8 +37,26 @@ export class CartComponent implements OnInit {
   }
 
   checkout() {
-    alert('Order placed (demo)');
-    this.cart.clear();
+    if (this.items.length === 0) {
+      this.error = 'Your cart is empty.';
+      return;
+    }
+    
+    this.loading = true;
+    this.error = null;
+    
+    this.cart.checkout().subscribe({
+      next: (bill) => {
+        this.loading = false;
+        alert('Order placed successfully!');
+        this.router.navigate(['/my-bills']);
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Checkout failed:', err);
+        this.error = 'Failed to place order. Please try again.';
+      }
+    });
   }
 
   private sync() {

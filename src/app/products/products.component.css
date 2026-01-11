@@ -334,38 +334,63 @@ h1 {
 }
 
 /* ============================================
-   MODAL STYLES
+   NATIVE DIALOG MODAL STYLES
    ============================================ */
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99999;
-  padding: 1rem;
-  box-sizing: border-box;
+/* Native dialog element - breaks out of stacking context */
+.product-dialog {
+  border: none;
+  border-radius: 20px;
+  padding: 0;
+  max-width: 420px;
+  width: 90%;
+  background: transparent;
+  overflow: visible;
 }
 
-.modal {
+/* Dialog backdrop (::backdrop is a pseudo-element of the dialog) */
+.product-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* Dialog content wrapper */
+.product-dialog .dialog-content {
   background: #fff;
   border-radius: 20px;
   padding: 2rem;
-  width: 100%;
-  max-width: 420px;
   box-shadow: 0 25px 50px rgba(15, 23, 42, 0.25);
-  animation: modalIn 0.2s ease;
-  position: relative;
-  z-index: 100000;
+  animation: dialogIn 0.2s ease;
 }
 
-@keyframes modalIn {
+/* Opening animation */
+.product-dialog[open] {
+  animation: dialogFadeIn 0.2s ease;
+}
+
+.product-dialog[open]::backdrop {
+  animation: backdropFadeIn 0.2s ease;
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    background: rgba(15, 23, 42, 0);
+  }
+  to {
+    background: rgba(15, 23, 42, 0.6);
+  }
+}
+
+@keyframes dialogIn {
   from {
     opacity: 0;
     transform: scale(0.95) translateY(-10px);
@@ -376,7 +401,7 @@ h1 {
   }
 }
 
-.modal h2 {
+.product-dialog .dialog-content h2 {
   margin: 0 0 1.5rem;
   font-size: 1.35rem;
   font-weight: 700;

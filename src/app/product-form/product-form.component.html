@@ -1,0 +1,48 @@
+<!-- Product Form Modal - Using native dialog element for proper stacking context -->
+<dialog #productDialog class="product-dialog" (click)="onDialogBackdropClick($event)">
+  <div class="dialog-content" (click)="$event.stopPropagation()">
+    <h2>{{ isEditing ? 'Edit Product' : 'Add New Product' }}</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="productName">Name</label>
+        <input 
+          id="productName" 
+          type="text" 
+          [ngModel]="formName()" 
+          (ngModelChange)="updateName($event)"
+          name="name" 
+          required
+        >
+      </div>
+      <div class="form-group">
+        <label for="productPrice">Price (USD)</label>
+        <input 
+          id="productPrice" 
+          type="number" 
+          step="0.01" 
+          min="0" 
+          [ngModel]="formPrice()" 
+          (ngModelChange)="updatePrice($event)"
+          name="price" 
+          required
+        >
+      </div>
+      <div class="form-group">
+        <label for="productQuantity">Quantity</label>
+        <input 
+          id="productQuantity" 
+          type="number" 
+          min="0" 
+          [ngModel]="formQuantity()" 
+          (ngModelChange)="updateQuantity($event)"
+          name="quantity" 
+          required
+        >
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn-submit">{{ isEditing ? 'Update' : 'Create' }}</button>
+      </div>
+    </form>
+  </div>
+</dialog>

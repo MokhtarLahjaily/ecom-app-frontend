@@ -14,7 +14,7 @@
   <div class="topbar-right">
     @if (securityService.authStatus()) {
       <div class="user-block">
-        <span class="user-name">{{ securityService.profile?.username || 'Account' }}</span>
+        <span class="user-name">{{ securityService.profile()?.username || 'Account' }}</span>
         <button class="btn primary" (click)="securityService.logout()">Logout</button>
       </div>
     } @else {

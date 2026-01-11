@@ -1,33 +1,27 @@
-import { Component, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { ProductsService, CreateProductDTO } from '../services/products.service';
 import { CartService } from '../services/cart.service';
 import { SecurityService } from '../services/security.service';
 import { Product } from '../models/product.model';
+import { ProductFormComponent, ProductFormData } from '../product-form/product-form.component';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, RouterLink, DecimalPipe, FormsModule],
+  imports: [CommonModule, RouterLink, DecimalPipe, ProductFormComponent],
   templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./products.component.css']
 })
 export class ProductsComponent implements OnInit {
   products = signal<Product[]>([]);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
   
-  // Admin: Product form state
+  // Form dialog state
   showForm = signal<boolean>(false);
   editingProduct = signal<Product | null>(null);
-  
-  // Form model (two-way binding friendly)
-  formName = '';
-  formPrice = 0;
-  formQuantity = 0;
 
   constructor(
     private productsService: ProductsService,
@@ -41,7 +35,7 @@ export class ProductsComponent implements OnInit {
     this.fetchProducts();
   }
 
-  fetchProducts() {
+  fetchProducts(): void {
     this.loading.set(true);
     this.error.set(null);
     this.productsService.getProducts().subscribe({
@@ -57,51 +51,38 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  addToCart(product: Product) {
+  addToCart(product: Product): void {
     this.cartService.add(product, 1);
     alert('Added to cart');
   }
 
   // Admin actions
-  openAddForm() {
+  openAddForm(): void {
     console.log('[ProductsComponent] openAddForm called');
     this.editingProduct.set(null);
-    this.formName = '';
-    this.formPrice = 0;
-    this.formQuantity = 0;
     this.showForm.set(true);
-    console.log('[ProductsComponent] showForm:', this.showForm());
   }
 
-  openEditForm(product: Product) {
+  openEditForm(product: Product): void {
     console.log('[ProductsComponent] openEditForm called for:', product.name);
     this.editingProduct.set(product);
-    this.formName = product.name;
-    this.formPrice = product.price;
-    this.formQuantity = product.quantity;
     this.showForm.set(true);
-    console.log('[ProductsComponent] showForm:', this.showForm());
   }
 
-  cancelForm() {
-    this.showForm.set(false);
-    this.editingProduct.set(null);
-  }
-
-  saveProduct() {
+  onFormSubmit(formData: ProductFormData): void {
     const data: CreateProductDTO = {
-      name: this.formName,
-      price: this.formPrice,
-      quantity: this.formQuantity
+      name: formData.name,
+      price: formData.price,
+      quantity: formData.quantity
     };
     const editing = this.editingProduct();
-    
+
     if (editing) {
       // Update existing product
       this.productsService.update(String(editing.id), data).subscribe({
         next: () => {
+          this.closeForm();
           this.fetchProducts();
-          this.cancelForm();
         },
         error: (err) => {
           console.error('Failed to update product:', err);
@@ -112,8 +93,8 @@ export class ProductsComponent implements OnInit {
       // Create new product
       this.productsService.create(data).subscribe({
         next: () => {
+          this.closeForm();
           this.fetchProducts();
-          this.cancelForm();
         },
         error: (err) => {
           console.error('Failed to create product:', err);
@@ -123,7 +104,16 @@ export class ProductsComponent implements OnInit {
     }
   }
 
-  deleteProduct(product: Product) {
+  onFormCancel(): void {
+    this.closeForm();
+  }
+
+  private closeForm(): void {
+    this.showForm.set(false);
+    this.editingProduct.set(null);
+  }
+
+  deleteProduct(product: Product): void {
     if (confirm(`Delete "${product.name}"?`)) {
       this.productsService.delete(String(product.id)).subscribe({
         next: () => this.fetchProducts(),
